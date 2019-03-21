@@ -17,3 +17,4 @@ ssh-add id_rsa
 git clone git@github.com:antonbo/atn.git -b devel
 git clone git@github.com:viablock/atn_setup.git
 
+ln -s atn_setup/update.sh update.sh
