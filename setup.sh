@@ -1,20 +1,10 @@
 #! /bin/sh -e
 
-sudo apt-get install git wget openssh-client build-essential make flex bison linux-headers-`uname -r` gcc net-tools
+sudo sh -c 'echo "test ALL = NOPASSWD: ALL" > /etc/sudoers.d/test'
 
-rm -f id_rsa
-wget -c https://github.com/viaBlock/atn_setup/raw/master/id_rsa
-#kill old ssh-agent
-if [ "$SSH_AGENT_PID" ] ; then
-  kill -9 $SSH_AGENT_PID
-fi
+sudo apt-get install build-essential bash git wget openssh-client make flex bison gcc net-tools iputils-arping linux-headers-`uname -r`
 
-#run new ssh-agent
-eval `ssh-agent -s`
-chmod 0600 id_rsa
-ssh-add id_rsa
-
-git clone git@github.com:antonbo/atn.git -b devel
-git clone git@github.com:viablock/atn_setup.git
+git clone https://github.com/viaBlock/atn.git
+git clone https://github.com/viaBlock/atn_setup.git
 
 ln -s atn_setup/update.sh update.sh
