@@ -1,19 +1,23 @@
 # ATN setup
-Helpers to download, setup and work with ATN environment
 
-The repository contains several helper scripts prepaer environment for work with ATN
+Group of helpers to download, setup and work within the ATN environment
+
+The repository contains several helper scripts to prepare the environment for the ATN
 kernel module.
 
 ## Initial preparation
-Two or more computers are required to test ATN functionality. This could be physical or virtual VMs.
-It's **ultimate important** to make sure there is a **direct Ethernet-like connection between test machines**
-since the implementation is based on LLC encapsulation and not using IP networks.
-So any combination of these most probably would not work:
-* EC2 AWS cloud machines (only IP communication, VPC might solve the problem but not tested)
-* Machines behind any kind of firewall or NAT
+Two or more nodes are required to test ATN functionality. This could be physical appliances or virtual VMs.
+It's **ultimate important** to make sure there is a **direct Ethernet connection between the nodes**
+since the implementation is based on LLC encapsulation and not using TCP/IP.
+
+So any combination of the below, is expected not to work:
+
+* Public cloud instances (unless they are based on the same dedicated host; a feature that needs to be enabled)
+* Nodes behind any kind of firewall or NAT
 
 To help out with environement preparation there is a script 'vbox_prepare.sh'.
-The script will prepare 2 VMs running Ubuntu 18.04 Server. Second VM is created
+
+This script will prepare 2 VMs running Ubuntu 18.04 Server. Second VM is created
 as a Linked Clone from original VM.
 Default user is 'test'. Password for 'test' and 'root' is 'test'
 
@@ -53,13 +57,13 @@ Usage: test/chatapp [-sidv] [-l addr] [-r addr] [-m len] [msg]
 ### To run test:
 
 So the simple scenario requires server and client parts. Server is started in background and waiting for
-requests from any client. Client(s) are talking to server by ATN connection:
+requests from any client. Clients are talking to server via CLNP:
+
 ** Server instance (run from project root) specified with -s parameter:
 ```sh
 ./atn/test/chatapp -s -l <ATN address>
 ```
-Server instance will receive message from client and send it back unmodified to the same client
-the message received from.
+Server instance will receive message from client and send it back unmodified to the same client that originates the message
 
 *** Client instance:
 ```sh
@@ -71,8 +75,8 @@ Client instance will perform verification between original message and reply fro
 Original source code is stored inside git repository hosted on GitHub:
 https://github.com/viablock/atn.git
 
-There is not need to download code directly since [setup.sh](https://github.com/viaBlock/atn_setup/raw/master/setup.sh) will
-do the download for you.
+There is no need to download code directly since the script [setup.sh](https://github.com/viaBlock/atn_setup/raw/master/setup.sh) will
+automatically do it.
 
 ## Setup packet dump
 
@@ -105,8 +109,8 @@ You could replace 'all' in the confiuguration with network interface used for AT
 still need to comunicated with IPv6 network.
 
 ## Simplified way to test
-Special script run_test.sh is created to run most of above steps. It will build all software, prepare kernel by loading
-all required modules, and will run chatapp with provided parameters. The parameters are very similar to chatapp.
+Special script 'run_test.sh' is created to run the majority of the above steps. It will build all software pieces, prepare kernel by loading
+all required modules, and will run the 'chatapp' with the provided parameters. The parameters are very similar to chatapp.
 run_test.sh is using chatapp as a core, but also helps out with build, cleanup and packet capturing and
 simplified ATN address specification.
 
@@ -129,11 +133,11 @@ Usage: run_test.sh [-snt] -l addr [-r addr] msg1 [msg2 msg3 ...]
 ```
 
 For example if we are running with our VMs prepared with vbox_prepare.sh script:
-On first VM (server, MAC address 080020bf3122, server ATN would be 4700278147425200000000080020bf3122):
+On first VM (server, MAC address 080020BF3122, server ATN would be FA0000000000000000AAAA000000080020BF3122):
 ```sh
 ./atn/run_test.sh -s -l enp0s8
 ```
-On second and all other VMs (clients, client ATN would be 4700278147425200000000*XXXXXXXXXXXX*, where *XXXXXXXXXXXX* represent client MAC for enp0s8):
+On second and all other VMs (clients, client ATN would be FA0000000000000000AAAA000000XXXXXXXXXXXX, where *XXXXXXXXXXXX* represent client MAC address for enp0s8 interface):
 ```sh
-./atn/run_test.sh -l enp0s8 -r 4700278147425200000000080020bf3122 <msg1>
+./atn/run_test.sh -l enp0s8 -r FA0000000000000000AAAA000000080020BF3122 <msg1>
 ```
