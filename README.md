@@ -1,6 +1,6 @@
 # ATN setup
 
-Group of helpers to download, setup and work within the ATN environment
+Group of helpers to download, setup and work within the CLNP environment
 
 The repository contains several helper scripts to prepare the environment for the ATN
 kernel module.
@@ -46,10 +46,10 @@ Descriptions of the atn/:
 ** test/chatapp.c - source code for test client. After build tool would be called test/chatapp.
 Usage: test/chatapp [-sidv] [-l addr] [-r addr] [-m len] [msg]
   -s|--server  - start server
-  -l|--local   - local address (must be specified for server and client)
-  -r|--remote  - remote address (server address for clients)
-  -i|--inet    - use IPv4 stack instead of ATN (emulate using IPv4 instead of ATN)
-  -d|--dgram   - use DGRAM socket instead of RAW (not used for ATN)
+  -l|--local   - local NSAP address (must be specified for server and client)
+  -r|--remote  - remote NSAP address (server address for clients)
+  -i|--inet    - use IPv4 stack instead of CLNP (emulate using IPv4 instead of CLNP)
+  -d|--dgram   - use DGRAM socket instead of RAW (not used for CLNP)
   -v|--verbose - be verbose about data sent and received (show more debugs about data sent)
   -m|--msglen  - use random date of specified len
   msg          - optional message to send, use full MTU if neither msg or msglen specified
@@ -61,13 +61,13 @@ requests from any client. Clients are talking to server via CLNP:
 
 ** Server instance (run from project root) specified with -s parameter:
 ```sh
-./atn/test/chatapp -s -l <ATN address>
+./atn/test/chatapp -s -l <NSAP address>
 ```
 Server instance will receive message from client and send it back unmodified to the same client that originates the message
 
 *** Client instance:
 ```sh
-./atn/test/chatapp -l <client ATN address> -r <server ATN address> <msg1>
+./atn/test/chatapp -l <client NSAP address> -r <server NSAP address> <msg1>
 ```
 Client instance will perform verification between original message and reply from the server.
 
@@ -105,14 +105,14 @@ net.ipv6.conf.all.accepot_ra=0
 net.ipv6.conf.all.disable_ipv6=1
 ```
 
-You could replace 'all' in the confiuguration with network interface used for ATN. This might be important if machine
-still need to comunicated with IPv6 network.
+You could replace 'all' in the confiuguration with network interface used for CLNP communications. This might be important if machine
+still need to comunicate over an IPv6 network.
 
 ## Simplified way to test
 Special script 'run_test.sh' is created to run the majority of the above steps. It will build all software pieces, prepare kernel by loading
 all required modules, and will run the 'chatapp' with the provided parameters. The parameters are very similar to chatapp.
 run_test.sh is using chatapp as a core, but also helps out with build, cleanup and packet capturing and
-simplified ATN address specification.
+simplified NSAP address specification.
 
 Usage: run_test.sh [-snt] -l addr [-r addr] msg1 [msg2 msg3 ...]
   -s   - start server
@@ -124,20 +124,20 @@ Usage: run_test.sh [-snt] -l addr [-r addr] msg1 [msg2 msg3 ...]
 
 ### Server side:
 ```sh
-./atn/run_test.sh -s -l <ifname or ATN address>
+./atn/run_test.sh -s -l <ifname or NSAP address>
 ```
 
 ### Client side:
 ```sh
-./atn/run_test.sh -l <ifname or ATN address> -r <server ATN address> <msg1> [<msg2> <msg3> ...]
+./atn/run_test.sh -l <ifname or NSAP address> -r <server NSAP address> <msg1> [<msg2> <msg3> ...]
 ```
 
 For example if we are running with our VMs prepared with vbox_prepare.sh script:
-On first VM (server, MAC address 080020BF3122, server ATN would be FA0000000000000000AAAA000000080020BF3122):
+On first VM (server, MAC address 080020BF3122, server NSAP address would be FA0000000000000000AAAA000000080020BF3122):
 ```sh
 ./atn/run_test.sh -s -l enp0s8
 ```
-On second and all other VMs (clients, client ATN would be FA0000000000000000AAAA000000XXXXXXXXXXXX, where *XXXXXXXXXXXX* represent client MAC address for enp0s8 interface):
+On second and all other VMs (clients, client NSAP address would be FA0000000000000000AAAA000000XXXXXXXXXXXX, where *XXXXXXXXXXXX* represent client MAC address for enp0s8 interface):
 ```sh
 ./atn/run_test.sh -l enp0s8 -r FA0000000000000000AAAA000000080020BF3122 <msg1>
 ```
